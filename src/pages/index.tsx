@@ -3,9 +3,9 @@ import { Input } from "@/components/ui/input";
 import { Pagination } from "@/components/Pagination";
 
 import { Select } from "@/components/Select";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
-import { useDebounce } from "@uidotdev/usehooks";
 import axios from "axios";
 import { Inter } from "next/font/google";
 import Image from "next/image";
@@ -63,20 +63,22 @@ export default function Home() {
   }, []);
 
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const debouncedSearchQuery = useDebounce(searchQuery, 500);
+  const [searchString, setSearchString] = useState<string>("");
 
   const fetchImages = async () => {
     const response = await axios.get(
-      `/api/unsplash?query=${debouncedSearchQuery}&orderBy=${orderBy}&orientation=${orientation}&page=${page}`
+      `/api/unsplash?query=${searchQuery}&orderBy=${orderBy}&orientation=${orientation}&page=${page}`
     );
     return response.data;
   };
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["images", debouncedSearchQuery, orderBy, orientation, page],
+    queryKey: ["images", searchQuery, orderBy, orientation, page],
     queryFn: fetchImages,
-    enabled: debouncedSearchQuery.length > 0,
+    enabled: !!searchQuery,
   });
+
+  console.log("data: ", data);
 
   const handlePaginationChange = (newPage: number) => {
     router.push(
@@ -105,14 +107,23 @@ export default function Home() {
     <main
       className={`flex flex-col items-center justify-between p-24 mx-auto max-w-4xl gap-2 ${inter.className}`}
     >
-      <div className="flex flex-col gap-2 w-1/2">
-        <Input
-          type="text"
-          placeholder="Search photos..."
-          className="w-full"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
+      <form
+        className="flex flex-col gap-2 w-1/2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          setSearchQuery(searchString);
+        }}
+      >
+        <div className="flex justify-between gap-2 w-full">
+          <Input
+            type="text"
+            placeholder="Search photos..."
+            className="flex-grow"
+            value={searchString}
+            onChange={(e) => setSearchString(e.target.value)}
+          />
+          <Button type="submit">Submit</Button>
+        </div>
 
         <div className="flex justify-between gap-1 w-full">
           <Select
@@ -129,7 +140,7 @@ export default function Home() {
             onValueChange={(value) => handleSelectChange(value, "orientation")}
           />
         </div>
-      </div>
+      </form>
 
       <div className="flex flex-col justify-between">
         <div className="flex items-center justify-center min-h-[500px]">
