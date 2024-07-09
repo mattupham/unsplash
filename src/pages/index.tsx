@@ -2,6 +2,7 @@ import { Input } from "@/components/ui/input";
 
 import { Pagination } from "@/components/Pagination";
 
+import { Grid } from "@/components/Grid";
 import { Select } from "@/components/Select";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,10 +13,6 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { ColorId, SearchOrderBy } from "unsplash-js";
-
-const Grid: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">{children}</div>
-);
 
 const inter = Inter({ subsets: ["latin"] });
 
