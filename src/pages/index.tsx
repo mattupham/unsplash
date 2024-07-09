@@ -1,22 +1,8 @@
 import { Input } from "@/components/ui/input";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
+import { PaginationComponent } from "@/components/PaginationComponent";
+
+import { SelectComponent } from "@/components/SelectComponent";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
@@ -28,36 +14,6 @@ import { useEffect, useState } from "react";
 import { Orientation, SearchOrderBy } from "unsplash-js";
 
 const inter = Inter({ subsets: ["latin"] });
-
-interface SelectDropdownProps {
-  selectedValue: string;
-  placeholder: string;
-  options: { value: string; label: string }[];
-  onValueChange: (value: string) => void;
-}
-
-const SelectDropdown = ({
-  selectedValue,
-  placeholder,
-  options,
-  onValueChange,
-}: SelectDropdownProps) => (
-  <Select value={selectedValue} onValueChange={onValueChange}>
-    <SelectTrigger className="w-full">
-      <SelectValue placeholder={placeholder} />
-    </SelectTrigger>
-    <SelectContent>
-      <SelectGroup>
-        <SelectLabel>{placeholder} Options</SelectLabel>
-        {options.map((option) => (
-          <SelectItem key={option.value} value={option.value}>
-            {option.label}
-          </SelectItem>
-        ))}
-      </SelectGroup>
-    </SelectContent>
-  </Select>
-);
 
 const DEFAULTS = {
   page: 1,
@@ -121,8 +77,6 @@ export default function Home() {
     enabled: debouncedSearchQuery.length > 0,
   });
 
-  console.log("data: ", data);
-
   const handlePaginationChange = (newPage: number) => {
     router.push(
       { pathname: router.pathname, query: { page: newPage } },
@@ -156,14 +110,14 @@ export default function Home() {
         />
 
         <div className="flex justify-between gap-2 w-full">
-          <SelectDropdown
+          <SelectComponent
             selectedValue={orderBy as string}
             placeholder="Sort"
             options={sortOptions}
             onValueChange={(value) => handleSelectChange(value, "orderBy")}
           />
 
-          <SelectDropdown
+          <SelectComponent
             selectedValue={orientation as string}
             placeholder="Filter"
             options={filterOptions}
@@ -209,31 +163,10 @@ export default function Home() {
       </div>
 
       {!error && data?.length > 0 && (
-        <Pagination className="mb-4">
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                onClick={() => handlePaginationChange(page - 1)}
-              />
-            </PaginationItem>
-            {/* Example pagination, needs dynamic generation based on data or total pages */}
-            {[...Array(5)].map((_, i) => (
-              <PaginationItem key={i}>
-                <PaginationLink onClick={() => handlePaginationChange(i + 1)}>
-                  {i + 1}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
-            <PaginationItem>
-              <PaginationEllipsis />
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationNext
-                onClick={() => handlePaginationChange((page || 0) + 1)}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
+        <PaginationComponent
+          page={page}
+          handlePaginationChange={handlePaginationChange}
+        />
       )}
     </main>
   );
