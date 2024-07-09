@@ -11,11 +11,11 @@ export default async function handler(
 ) {
   if (req.method === "GET") {
     try {
-      const { orderBy, orientation } = req.query;
+      const { query = "", orderBy, orientation, page = 1 } = req.query;
 
       const response = await unsplashApi.search.getPhotos({
-        query: "nature",
-        page: 1,
+        query: query as string,
+        page: parseInt(page as string, 10),
         perPage: 6,
         orderBy: orderBy as SearchOrderBy,
         orientation: orientation as Orientation,

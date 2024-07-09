@@ -17,7 +17,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
+import { useDebounce } from "@uidotdev/usehooks";
 import axios from "axios";
 import { Inter } from "next/font/google";
 import Image from "next/image";
@@ -59,6 +61,9 @@ const SelectDropdown = ({
 export default function Home() {
   const [selectedSort, setSelectedSort] = useState<SearchOrderBy>("latest");
   const [selectedFilter, setSelectedFilter] = useState<Orientation>("squarish");
+  const [page, setPage] = useState<number>(1);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   const sortOptions: { value: SearchOrderBy; label: string }[] = [
     { value: "latest", label: "Latest" },
@@ -74,14 +79,15 @@ export default function Home() {
 
   const fetchImages = async () => {
     const response = await axios.get(
-      `/api/unsplash?orderBy=${selectedSort}&orientation=${selectedFilter}`
+      `/api/unsplash?query=${debouncedSearchQuery}&orderBy=${selectedSort}&orientation=${selectedFilter}&page=${page}`
     );
     return response.data;
   };
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["images", selectedSort],
+    queryKey: ["images", debouncedSearchQuery, selectedSort, page],
     queryFn: fetchImages,
+    enabled: debouncedSearchQuery.length > 0,
   });
 
   console.log("data: ", data);
@@ -91,7 +97,13 @@ export default function Home() {
       className={`flex min-h-screen flex-col items-center justify-between p-24 mx-auto max-w-4xl gap-2 ${inter.className}`}
     >
       <div className="flex flex-col gap-2 w-1/2">
-        <Input type="text" placeholder="Search photos..." className="w-full" />
+        <Input
+          type="text"
+          placeholder="Search photos..."
+          className="w-full"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
 
         <div className="flex justify-between gap-2 w-full">
           <SelectDropdown
@@ -112,7 +124,11 @@ export default function Home() {
 
       <div className="grid grid-cols-3 gap-4 mb-4">
         {isLoading ? (
-          <p>Loading...</p>
+          <>
+            {Array.from({ length: 6 }, (_, index) => (
+              <Skeleton key={index} className="h-[210px] w-[210px]" />
+            ))}
+          </>
         ) : error ? (
           <p>Error fetching images</p>
         ) : (
