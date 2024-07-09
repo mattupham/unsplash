@@ -20,3 +20,7 @@ Run tests:
 ```bash
 npm run test
 ```
+
+## Running Tests
+
+Loom video overview: [Click Here](https://www.loom.com/share/04158736ed874e50b85958a3d6e9ff04)
