@@ -99,7 +99,7 @@ export default function Home() {
 
   return (
     <main
-      className={`flex min-h-screen flex-col items-center justify-between p-24 mx-auto max-w-4xl gap-2 ${inter.className}`}
+      className={`flex flex-col items-center justify-between p-24 mx-auto max-w-4xl gap-2 ${inter.className}`}
     >
       <div className="flex flex-col gap-2 w-1/2">
         <Input
@@ -110,7 +110,7 @@ export default function Home() {
           onChange={(e) => setSearchQuery(e.target.value)}
         />
 
-        <div className="flex justify-between gap-2 w-full">
+        <div className="flex justify-between gap-1 w-full">
           <Select
             selectedValue={orderBy as string}
             placeholder="Sort"
@@ -127,51 +127,56 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="h-[500px] overflow-y-auto">
-        {error ? (
-          <p>Error fetching images</p>
-        ) : isLoading ? (
-          <div className="grid grid-cols-3 gap-4 mb-4">
-            {Array.from({ length: 6 }, (_, index) => (
-              <Skeleton key={index} className="h-[210px] w-[210px]" />
-            ))}
-          </div>
-        ) : data === undefined ? (
-          <div className="flex justify-center items-center w-full h-full">
-            <p className="text-lg font-semibold text-gray-600">
-              Please search for a photo
-            </p>
-          </div>
-        ) : data?.length === 0 ? (
-          <div className="flex justify-center items-center w-full h-full">
-            <p className="text-lg font-semibold text-gray-600">
-              No Photos found
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-3 gap-4 mb-4">
-            {data?.map(
-              (image: {
-                id: string;
-                alt_description: string;
-                urls: { regular: string };
-              }) => (
-                <Image
-                  key={image.id}
-                  alt={image.alt_description}
-                  width={400}
-                  height={400}
-                  src={image.urls.regular}
-                />
-              )
-            )}
-          </div>
-        )}
+      <div className="flex flex-col justify-between">
+        <div className="flex items-center justify-center min-h-[500px]">
+          {error ? (
+            <div className="flex justify-center items-center h-full">
+              <p>Error fetching images</p>
+            </div>
+          ) : isLoading ? (
+            <div className="grid grid-cols-3 gap-4">
+              {Array.from({ length: 6 }, (_, index) => (
+                <Skeleton key={index} className="h-52 w-52" />
+              ))}
+            </div>
+          ) : data === undefined ? (
+            <div className="flex justify-center items-center h-full">
+              <p className="text-lg font-semibold text-gray-600">
+                Please search for a photo
+              </p>
+            </div>
+          ) : data?.length === 0 ? (
+            <div className="flex justify-center items-center h-full">
+              <p className="text-lg font-semibold text-gray-600">
+                No Photos found
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-4">
+              {data?.map(
+                (image: {
+                  id: string;
+                  alt_description: string;
+                  urls: { thumb: string };
+                }) => (
+                  <div key={image.id} className="w-52 h-52 relative">
+                    <Image
+                      alt={image.alt_description}
+                      layout="fill"
+                      objectFit="contain"
+                      src={image.urls.thumb}
+                    />
+                  </div>
+                )
+              )}
+            </div>
+          )}
+        </div>
       </div>
-
-      {!error && data?.length > 0 && (
-        <Pagination page={page} handleChange={handlePaginationChange} />
-      )}
+      <Pagination
+        page={parseInt(page as string, 10)}
+        handleChange={handlePaginationChange}
+      />
     </main>
   );
 }
