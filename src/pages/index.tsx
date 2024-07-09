@@ -17,9 +17,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 import { Inter } from "next/font/google";
 import Image from "next/image";
 import { useState } from "react";
+import { Orientation, SearchOrderBy } from "unsplash-js";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -54,20 +57,34 @@ const SelectDropdown = ({
 );
 
 export default function Home() {
-  const [selectedSort, setSelectedSort] = useState("");
-  const [selectedFilter, setSelectedFilter] = useState("");
+  const [selectedSort, setSelectedSort] = useState<SearchOrderBy>("latest");
+  const [selectedFilter, setSelectedFilter] = useState<Orientation>("squarish");
 
-  const sortOptions = [
+  const sortOptions: { value: SearchOrderBy; label: string }[] = [
     { value: "latest", label: "Latest" },
-    { value: "oldest", label: "Oldest" },
-    { value: "popular", label: "Popular" },
+    { value: "relevant", label: "Relevant" },
+    { value: "editorial", label: "Editorial" },
   ];
 
-  const filterOptions = [
+  const filterOptions: { value: Orientation; label: string }[] = [
     { value: "landscape", label: "Landscape" },
     { value: "portrait", label: "Portrait" },
     { value: "squarish", label: "Squarish" },
   ];
+
+  const fetchImages = async () => {
+    const response = await axios.get(
+      `/api/unsplash?orderBy=${selectedSort}&orientation=${selectedFilter}`
+    );
+    return response.data;
+  };
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["images", selectedSort],
+    queryFn: fetchImages,
+  });
+
+  console.log("data: ", data);
 
   return (
     <main
@@ -94,60 +111,21 @@ export default function Home() {
       </div>
 
       <div className="grid grid-cols-3 gap-4 mb-4">
-        <Image
-          alt="image"
-          width={400}
-          height={400}
-          src="https://images.unsplash.com/photo-1720378042263-bd1a33156bbb?q=80&w=3387&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-        />
-        <Image
-          alt="image"
-          width={400}
-          height={400}
-          src="https://images.unsplash.com/photo-1720378042263-bd1a33156bbb?q=80&w=3387&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-        />
-        <Image
-          alt="image"
-          width={400}
-          height={400}
-          src="https://images.unsplash.com/photo-1720378042263-bd1a33156bbb?q=80&w=3387&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-        />
-        <Image
-          alt="image"
-          width={400}
-          height={400}
-          src="https://images.unsplash.com/photo-1720378042263-bd1a33156bbb?q=80&w=3387&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-        />
-        <Image
-          alt="image"
-          width={400}
-          height={400}
-          src="https://images.unsplash.com/photo-1720378042263-bd1a33156bbb?q=80&w=3387&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-        />
-        <Image
-          alt="image"
-          width={400}
-          height={400}
-          src="https://images.unsplash.com/photo-1720378042263-bd1a33156bbb?q=80&w=3387&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-        />
-        <Image
-          alt="image"
-          width={400}
-          height={400}
-          src="https://images.unsplash.com/photo-1720378042263-bd1a33156bbb?q=80&w=3387&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-        />
-        <Image
-          alt="image"
-          width={400}
-          height={400}
-          src="https://images.unsplash.com/photo-1720378042263-bd1a33156bbb?q=80&w=3387&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-        />
-        <Image
-          alt="image"
-          width={400}
-          height={400}
-          src="https://images.unsplash.com/photo-1720378042263-bd1a33156bbb?q=80&w=3387&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-        />
+        {isLoading ? (
+          <p>Loading...</p>
+        ) : error ? (
+          <p>Error fetching images</p>
+        ) : (
+          data?.map((image) => (
+            <Image
+              key={image.id}
+              alt={image.alt_description}
+              width={400}
+              height={400}
+              src={image.urls.regular}
+            />
+          ))
+        )}
       </div>
 
       <Pagination className="mb-4">
