@@ -2,6 +2,10 @@
 
 ## Getting Started
 
+Create an .env.local file, and add your Unsplash key:
+
+Create an `.env.local` file using the following value: `UNSPLASH_ACCESS_KEY=...`
+
 First, run the development server:
 
 ```bash
