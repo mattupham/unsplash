@@ -23,25 +23,26 @@ import { useDebounce } from "@uidotdev/usehooks";
 import axios from "axios";
 import { Inter } from "next/font/google";
 import Image from "next/image";
-import { useState } from "react";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 import { Orientation, SearchOrderBy } from "unsplash-js";
 
 const inter = Inter({ subsets: ["latin"] });
 
 interface SelectDropdownProps {
   selectedValue: string;
-  setSelectedValue: (value: string) => void;
   placeholder: string;
   options: { value: string; label: string }[];
+  onValueChange: (value: string) => void;
 }
 
 const SelectDropdown = ({
   selectedValue,
-  setSelectedValue,
   placeholder,
   options,
+  onValueChange,
 }: SelectDropdownProps) => (
-  <Select value={selectedValue} onValueChange={setSelectedValue}>
+  <Select value={selectedValue} onValueChange={onValueChange}>
     <SelectTrigger className="w-full">
       <SelectValue placeholder={placeholder} />
     </SelectTrigger>
@@ -58,10 +59,40 @@ const SelectDropdown = ({
   </Select>
 );
 
+const DEFAULTS = {
+  page: 1,
+  orderBy: "latest",
+  orientation: "squarish",
+};
+
 export default function Home() {
-  const [selectedSort, setSelectedSort] = useState<SearchOrderBy>("latest");
-  const [selectedFilter, setSelectedFilter] = useState<Orientation>("squarish");
-  const [page, setPage] = useState<number>(1);
+  const router = useRouter();
+
+  const {
+    page = DEFAULTS.page,
+    orderBy = DEFAULTS.orderBy,
+    orientation = DEFAULTS.orientation,
+  } = router.query;
+
+  useEffect(() => {
+    console.log("page: ", page);
+    console.log("orderBy: ", orderBy);
+    console.log("orientation: ", orientation);
+
+    router.replace(
+      {
+        pathname: router.pathname,
+        query: {
+          page: page || DEFAULTS.page,
+          orderBy: orderBy || DEFAULTS.orderBy,
+          orientation: orientation || DEFAULTS.orientation,
+        },
+      },
+      undefined,
+      { shallow: true }
+    );
+  }, []);
+
   const [searchQuery, setSearchQuery] = useState<string>("");
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
@@ -79,18 +110,37 @@ export default function Home() {
 
   const fetchImages = async () => {
     const response = await axios.get(
-      `/api/unsplash?query=${debouncedSearchQuery}&orderBy=${selectedSort}&orientation=${selectedFilter}&page=${page}`
+      `/api/unsplash?query=${debouncedSearchQuery}&orderBy=${orderBy}&orientation=${orientation}&page=${page}`
     );
     return response.data;
   };
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["images", debouncedSearchQuery, selectedSort, page],
+    queryKey: ["images", debouncedSearchQuery, orderBy, orientation, page],
     queryFn: fetchImages,
     enabled: debouncedSearchQuery.length > 0,
   });
 
   console.log("data: ", data);
+
+  const handlePaginationChange = (newPage: number) => {
+    router.push(
+      { pathname: router.pathname, query: { page: newPage } },
+      undefined,
+      { shallow: true }
+    );
+  };
+
+  const handleSelectChange = (
+    value: string,
+    key: "orderBy" | "orientation"
+  ) => {
+    router.replace(
+      { pathname: location.pathname, query: { ...router.query, [key]: value } },
+      undefined,
+      { shallow: true }
+    );
+  };
 
   return (
     <main
@@ -107,67 +157,84 @@ export default function Home() {
 
         <div className="flex justify-between gap-2 w-full">
           <SelectDropdown
-            selectedValue={selectedSort}
-            setSelectedValue={setSelectedSort}
+            selectedValue={orderBy as string}
             placeholder="Sort"
             options={sortOptions}
+            onValueChange={(value) => handleSelectChange(value, "orderBy")}
           />
 
           <SelectDropdown
-            selectedValue={selectedFilter}
-            setSelectedValue={setSelectedFilter}
+            selectedValue={orientation as string}
             placeholder="Filter"
             options={filterOptions}
+            onValueChange={(value) => handleSelectChange(value, "orientation")}
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4 mb-4">
-        {isLoading ? (
-          <>
+      <div className="h-[500px] overflow-y-auto">
+        {error ? (
+          <p>Error fetching images</p>
+        ) : isLoading ? (
+          <div className="grid grid-cols-3 gap-4 mb-4">
             {Array.from({ length: 6 }, (_, index) => (
               <Skeleton key={index} className="h-[210px] w-[210px]" />
             ))}
-          </>
-        ) : error ? (
-          <p>Error fetching images</p>
+          </div>
+        ) : data === undefined ? (
+          <div className="flex justify-center items-center w-full h-full">
+            <p className="text-lg font-semibold text-gray-600">
+              Please search for a photo
+            </p>
+          </div>
+        ) : data?.length === 0 ? (
+          <div className="flex justify-center items-center w-full h-full">
+            <p className="text-lg font-semibold text-gray-600">
+              No Photos found
+            </p>
+          </div>
         ) : (
-          data?.map((image) => (
-            <Image
-              key={image.id}
-              alt={image.alt_description}
-              width={400}
-              height={400}
-              src={image.urls.regular}
-            />
-          ))
+          <div className="grid grid-cols-3 gap-4 mb-4">
+            {data?.map((image) => (
+              <Image
+                key={image.id}
+                alt={image.alt_description}
+                width={400}
+                height={400}
+                src={image.urls.regular}
+              />
+            ))}
+          </div>
         )}
       </div>
 
-      <Pagination className="mb-4">
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious href="#" />
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationLink href="#">1</PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationLink href="#" isActive>
-              2
-            </PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationLink href="#">3</PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationEllipsis />
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationNext href="#" />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
+      {!error && data?.length > 0 && (
+        <Pagination className="mb-4">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={() => handlePaginationChange(page - 1)}
+              />
+            </PaginationItem>
+            {/* Example pagination, needs dynamic generation based on data or total pages */}
+            {[...Array(5)].map((_, i) => (
+              <PaginationItem key={i}>
+                <PaginationLink onClick={() => handlePaginationChange(i + 1)}>
+                  {i + 1}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            <PaginationItem>
+              <PaginationEllipsis />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationNext
+                onClick={() => handlePaginationChange((page || 0) + 1)}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
     </main>
   );
 }
