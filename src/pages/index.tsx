@@ -1,8 +1,8 @@
 import { Input } from "@/components/ui/input";
 
-import { PaginationComponent } from "@/components/PaginationComponent";
+import { Pagination } from "@/components/Pagination";
 
-import { SelectComponent } from "@/components/SelectComponent";
+import { Select } from "@/components/Select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
@@ -110,14 +110,14 @@ export default function Home() {
         />
 
         <div className="flex justify-between gap-2 w-full">
-          <SelectComponent
+          <Select
             selectedValue={orderBy as string}
             placeholder="Sort"
             options={sortOptions}
             onValueChange={(value) => handleSelectChange(value, "orderBy")}
           />
 
-          <SelectComponent
+          <Select
             selectedValue={orientation as string}
             placeholder="Filter"
             options={filterOptions}
@@ -163,10 +163,7 @@ export default function Home() {
       </div>
 
       {!error && data?.length > 0 && (
-        <PaginationComponent
-          page={page}
-          handlePaginationChange={handlePaginationChange}
-        />
+        <Pagination page={page} handleChange={handlePaginationChange} />
       )}
     </main>
   );

@@ -1,27 +1,27 @@
 import {
-  Select,
   SelectContent,
   SelectGroup,
   SelectItem,
   SelectLabel,
+  Select as SelectShadcn,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 
-interface SelectComponentProps {
+interface SelectProps {
   selectedValue: string;
   placeholder: string;
   options: { value: string; label: string }[];
   onValueChange: (value: string) => void;
 }
 
-export const SelectComponent = ({
+export const Select = ({
   selectedValue,
   placeholder,
   options,
   onValueChange,
-}: SelectComponentProps) => (
-  <Select value={selectedValue} onValueChange={onValueChange}>
+}: SelectProps) => (
+  <SelectShadcn value={selectedValue} onValueChange={onValueChange}>
     <SelectTrigger className="w-full">
       <SelectValue placeholder={placeholder} />
     </SelectTrigger>
@@ -35,5 +35,5 @@ export const SelectComponent = ({
         ))}
       </SelectGroup>
     </SelectContent>
-  </Select>
+  </SelectShadcn>
 );
