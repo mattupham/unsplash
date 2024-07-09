@@ -87,8 +87,6 @@ export default function Home() {
     enabled: !!searchQuery,
   });
 
-  console.log("data: ", data);
-
   const handlePaginationChange = (newPage: number) => {
     router.push(
       {
