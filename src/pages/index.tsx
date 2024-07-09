@@ -80,7 +80,11 @@ export default function Home() {
 
   const handlePaginationChange = (newPage: number) => {
     router.push(
-      { pathname: router.pathname, query: { page: newPage } },
+      {
+        pathname: router.pathname,
+        // page should not be less than 1
+        query: { ...router.query, page: Math.max(newPage, 1) },
+      },
       undefined,
       { shallow: true }
     );
@@ -173,10 +177,13 @@ export default function Home() {
           )}
         </div>
       </div>
-      <Pagination
-        page={parseInt(page as string, 10)}
-        handleChange={handlePaginationChange}
-      />
+      {!error && (
+        <Pagination
+          page={parseInt(page as string, 10)}
+          handleChange={handlePaginationChange}
+          hasMoreResults={!isLoading && data?.length > 0}
+        />
+      )}
     </main>
   );
 }

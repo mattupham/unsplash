@@ -1,6 +1,5 @@
 import {
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
@@ -13,25 +12,33 @@ interface PaginationProps {
   handleChange: (page: number) => void;
 }
 
-export const Pagination = ({ page, handleChange }: PaginationProps) => (
+export const Pagination = ({
+  page,
+  handleChange,
+}: PaginationProps & { hasMoreResults?: boolean }) => (
   <PaginationShadcn className="mb-4">
     <PaginationContent>
       <PaginationItem>
         <PaginationPrevious onClick={() => handleChange(page - 1)} />
       </PaginationItem>
-      {[...Array(5)].map((_, i) => (
-        <PaginationItem key={i}>
-          <PaginationLink onClick={() => handleChange(i + 1)}>
-            {i + 1}
-          </PaginationLink>
+      {Array.from({ length: 3 }, (_, i) => i + Math.max(page - 1, 1)).map(
+        (number) => (
+          <PaginationItem key={number}>
+            <PaginationLink
+              onClick={() => handleChange(number)}
+              isActive={number === page}
+            >
+              {number}
+            </PaginationLink>
+          </PaginationItem>
+        )
+      )}
+
+      <>
+        <PaginationItem>
+          <PaginationNext onClick={() => handleChange(page + 1)} />
         </PaginationItem>
-      ))}
-      <PaginationItem>
-        <PaginationEllipsis />
-      </PaginationItem>
-      <PaginationItem>
-        <PaginationNext onClick={() => handleChange((page || 0) + 1)} />
-      </PaginationItem>
+      </>
     </PaginationContent>
   </PaginationShadcn>
 );
