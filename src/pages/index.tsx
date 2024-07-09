@@ -16,7 +16,7 @@ import { ColorId, SearchOrderBy } from "unsplash-js";
 
 const inter = Inter({ subsets: ["latin"] });
 
-const DEFAULTS: {
+export const DEFAULTS: {
   page: number;
   orderBy: SearchOrderBy;
   color: ColorId;
@@ -113,6 +113,7 @@ export default function Home() {
     <main
       className={`flex flex-col items-center justify-between p-24 md:p-12 mx-auto max-w-4xl gap-2 ${inter.className}`}
     >
+      <h1 className="text-4xl font-bold py-8 text-center">Unsplash Gallery</h1>
       <form
         className="flex flex-col gap-2 w-full md:w-1/2"
         onSubmit={(e) => {
@@ -162,15 +163,11 @@ export default function Home() {
             </Grid>
           ) : data === undefined ? (
             <div className="flex justify-center items-center h-full">
-              <p className="text-lg font-semibold text-gray-600">
-                Please search for a photo
-              </p>
+              <p className="text-lg font-semibold">Please search for a photo</p>
             </div>
           ) : data?.length === 0 ? (
             <div className="flex justify-center items-center h-full">
-              <p className="text-lg font-semibold text-gray-600">
-                No Photos found
-              </p>
+              <p className="text-lg font-semibold">No Photos found</p>
             </div>
           ) : (
             <Grid>
