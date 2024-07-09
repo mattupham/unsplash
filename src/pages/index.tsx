@@ -19,49 +19,77 @@ import {
 } from "@/components/ui/select";
 import { Inter } from "next/font/google";
 import Image from "next/image";
+import { useState } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
 
+interface SelectDropdownProps {
+  selectedValue: string;
+  setSelectedValue: (value: string) => void;
+  placeholder: string;
+  options: { value: string; label: string }[];
+}
+
+const SelectDropdown = ({
+  selectedValue,
+  setSelectedValue,
+  placeholder,
+  options,
+}: SelectDropdownProps) => (
+  <Select value={selectedValue} onValueChange={setSelectedValue}>
+    <SelectTrigger className="w-full">
+      <SelectValue placeholder={placeholder} />
+    </SelectTrigger>
+    <SelectContent>
+      <SelectGroup>
+        <SelectLabel>{placeholder} Options</SelectLabel>
+        {options.map((option) => (
+          <SelectItem key={option.value} value={option.value}>
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectGroup>
+    </SelectContent>
+  </Select>
+);
+
 export default function Home() {
+  const [selectedSort, setSelectedSort] = useState("");
+  const [selectedFilter, setSelectedFilter] = useState("");
+
+  const sortOptions = [
+    { value: "latest", label: "Latest" },
+    { value: "oldest", label: "Oldest" },
+    { value: "popular", label: "Popular" },
+  ];
+
+  const filterOptions = [
+    { value: "landscape", label: "Landscape" },
+    { value: "portrait", label: "Portrait" },
+    { value: "squarish", label: "Squarish" },
+  ];
+
   return (
     <main
       className={`flex min-h-screen flex-col items-center justify-between p-24 mx-auto max-w-4xl gap-2 ${inter.className}`}
     >
       <div className="flex flex-col gap-2 w-1/2">
-        <Input type="email" placeholder="Email" className="w-full" />
+        <Input type="text" placeholder="Search photos..." className="w-full" />
 
         <div className="flex justify-between gap-2 w-full">
-          <Select className="w-1/2">
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select a fruit" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Fruits</SelectLabel>
-                <SelectItem value="apple">Apple</SelectItem>
-                <SelectItem value="banana">Banana</SelectItem>
-                <SelectItem value="blueberry">Blueberry</SelectItem>
-                <SelectItem value="grapes">Grapes</SelectItem>
-                <SelectItem value="pineapple">Pineapple</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          <SelectDropdown
+            selectedValue={selectedSort}
+            setSelectedValue={setSelectedSort}
+            placeholder="Sort"
+            options={sortOptions}
+          />
 
-          <Select className="w-1/2">
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select a fruit" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Fruits</SelectLabel>
-                <SelectItem value="apple">Apple</SelectItem>
-                <SelectItem value="banana">Banana</SelectItem>
-                <SelectItem value="blueberry">Blueberry</SelectItem>
-                <SelectItem value="grapes">Grapes</SelectItem>
-                <SelectItem value="pineapple">Pineapple</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          <SelectDropdown
+            selectedValue={selectedFilter}
+            setSelectedValue={setSelectedFilter}
+            placeholder="Filter"
+            options={filterOptions}
+          />
         </div>
       </div>
 
