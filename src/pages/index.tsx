@@ -13,6 +13,10 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { ColorId, SearchOrderBy } from "unsplash-js";
 
+const Grid: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">{children}</div>
+);
+
 const inter = Inter({ subsets: ["latin"] });
 
 const DEFAULTS: {
@@ -110,10 +114,10 @@ export default function Home() {
 
   return (
     <main
-      className={`flex flex-col items-center justify-between p-24 mx-auto max-w-4xl gap-2 ${inter.className}`}
+      className={`flex flex-col items-center justify-between p-24 md:p-12 mx-auto max-w-4xl gap-2 ${inter.className}`}
     >
       <form
-        className="flex flex-col gap-2 w-1/2"
+        className="flex flex-col gap-2 w-full md:w-1/2"
         onSubmit={(e) => {
           e.preventDefault();
           setSearchQuery(searchString);
@@ -154,11 +158,11 @@ export default function Home() {
               <p>Error fetching images</p>
             </div>
           ) : isLoading ? (
-            <div className="grid grid-cols-3 gap-4">
+            <Grid>
               {Array.from({ length: 6 }, (_, index) => (
                 <Skeleton key={index} className="h-52 w-52" />
               ))}
-            </div>
+            </Grid>
           ) : data === undefined ? (
             <div className="flex justify-center items-center h-full">
               <p className="text-lg font-semibold text-gray-600">
@@ -172,7 +176,7 @@ export default function Home() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-3 gap-4">
+            <Grid>
               {data?.map(
                 (image: {
                   id: string;
@@ -189,7 +193,7 @@ export default function Home() {
                   </div>
                 )
               )}
-            </div>
+            </Grid>
           )}
         </div>
       </div>
