@@ -156,7 +156,11 @@ export default function Home() {
           ) : isLoading ? (
             <Grid>
               {Array.from({ length: 6 }, (_, index) => (
-                <Skeleton key={index} className="h-52 w-52" />
+                <Skeleton
+                  key={index}
+                  className="h-52 w-52"
+                  data-testid={`skeleton-${index}`}
+                />
               ))}
             </Grid>
           ) : data === undefined ? (
