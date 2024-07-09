@@ -11,18 +11,18 @@ import { Inter } from "next/font/google";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { Orientation, SearchOrderBy } from "unsplash-js";
+import { ColorId, SearchOrderBy } from "unsplash-js";
 
 const inter = Inter({ subsets: ["latin"] });
 
 const DEFAULTS: {
   page: number;
   orderBy: SearchOrderBy;
-  orientation: Orientation;
+  color: ColorId;
 } = {
   page: 1,
   orderBy: "latest",
-  orientation: "squarish",
+  color: "black",
 };
 
 const sortOptions: { value: SearchOrderBy; label: string }[] = [
@@ -31,10 +31,18 @@ const sortOptions: { value: SearchOrderBy; label: string }[] = [
   { value: "editorial", label: "Editorial" },
 ];
 
-const filterOptions: { value: Orientation; label: string }[] = [
-  { value: "landscape", label: "Landscape" },
-  { value: "portrait", label: "Portrait" },
-  { value: "squarish", label: "Squarish" },
+const filterOptions: { value: ColorId; label: string }[] = [
+  { value: "black", label: "Black" },
+  { value: "black_and_white", label: "Black and White" },
+  { value: "blue", label: "Blue" },
+  { value: "green", label: "Green" },
+  { value: "magenta", label: "Magenta" },
+  { value: "orange", label: "Orange" },
+  { value: "purple", label: "Purple" },
+  { value: "red", label: "Red" },
+  { value: "teal", label: "Teal" },
+  { value: "white", label: "White" },
+  { value: "yellow", label: "Yellow" },
 ];
 
 export default function Home() {
@@ -43,7 +51,7 @@ export default function Home() {
   const {
     page = DEFAULTS.page,
     orderBy = DEFAULTS.orderBy,
-    orientation = DEFAULTS.orientation,
+    color = DEFAULTS.color,
   } = router.query;
 
   // Update the URL query params on first render
@@ -54,7 +62,7 @@ export default function Home() {
         query: {
           page: page || DEFAULTS.page,
           orderBy: orderBy || DEFAULTS.orderBy,
-          orientation: orientation || DEFAULTS.orientation,
+          color: color || DEFAULTS.color,
         },
       },
       undefined,
@@ -67,13 +75,13 @@ export default function Home() {
 
   const fetchImages = async () => {
     const response = await axios.get(
-      `/api/unsplash?query=${searchQuery}&orderBy=${orderBy}&orientation=${orientation}&page=${page}`
+      `/api/unsplash?query=${searchQuery}&orderBy=${orderBy}&color=${color}&page=${page}`
     );
     return response.data;
   };
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["images", searchQuery, orderBy, orientation, page],
+    queryKey: ["images", searchQuery, orderBy, color, page],
     queryFn: fetchImages,
     enabled: !!searchQuery,
   });
@@ -92,10 +100,7 @@ export default function Home() {
     );
   };
 
-  const handleSelectChange = (
-    value: string,
-    key: "orderBy" | "orientation"
-  ) => {
+  const handleSelectChange = (value: string, key: "orderBy" | "color") => {
     router.replace(
       { pathname: location.pathname, query: { ...router.query, [key]: value } },
       undefined,
@@ -134,10 +139,10 @@ export default function Home() {
           />
 
           <Select
-            selectedValue={orientation as string}
+            selectedValue={color as string}
             placeholder="Filter"
             options={filterOptions}
-            onValueChange={(value) => handleSelectChange(value, "orientation")}
+            onValueChange={(value) => handleSelectChange(value, "color")}
           />
         </div>
       </form>

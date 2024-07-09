@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { createApi, Orientation, SearchOrderBy } from "unsplash-js";
+import { ColorId, createApi, SearchOrderBy } from "unsplash-js";
 
 const unsplashApi = createApi({
   accessKey: process.env.UNSPLASH_ACCESS_KEY || "",
@@ -11,14 +11,14 @@ export default async function handler(
 ) {
   if (req.method === "GET") {
     try {
-      const { query = "", orderBy, orientation, page = 1 } = req.query;
+      const { query = "", orderBy, color, page = 1 } = req.query;
 
       const response = await unsplashApi.search.getPhotos({
         query: query as string,
         page: parseInt(page as string, 10),
         perPage: 6,
         orderBy: orderBy as SearchOrderBy,
-        orientation: orientation as Orientation,
+        color: color as ColorId,
       });
 
       console.log("response", response.response?.results);
