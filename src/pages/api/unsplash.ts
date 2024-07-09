@@ -21,6 +21,8 @@ export default async function handler(
         orientation: orientation as Orientation,
       });
 
+      console.log("response", response.response?.results);
+
       res.status(200).json(response?.response?.results);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch photos from Unsplash" });

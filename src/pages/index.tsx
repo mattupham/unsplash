@@ -15,11 +15,27 @@ import { Orientation, SearchOrderBy } from "unsplash-js";
 
 const inter = Inter({ subsets: ["latin"] });
 
-const DEFAULTS = {
+const DEFAULTS: {
+  page: number;
+  orderBy: SearchOrderBy;
+  orientation: Orientation;
+} = {
   page: 1,
   orderBy: "latest",
   orientation: "squarish",
 };
+
+const sortOptions: { value: SearchOrderBy; label: string }[] = [
+  { value: "latest", label: "Latest" },
+  { value: "relevant", label: "Relevant" },
+  { value: "editorial", label: "Editorial" },
+];
+
+const filterOptions: { value: Orientation; label: string }[] = [
+  { value: "landscape", label: "Landscape" },
+  { value: "portrait", label: "Portrait" },
+  { value: "squarish", label: "Squarish" },
+];
 
 export default function Home() {
   const router = useRouter();
@@ -30,11 +46,8 @@ export default function Home() {
     orientation = DEFAULTS.orientation,
   } = router.query;
 
+  // Update the URL query params on first render
   useEffect(() => {
-    console.log("page: ", page);
-    console.log("orderBy: ", orderBy);
-    console.log("orientation: ", orientation);
-
     router.replace(
       {
         pathname: router.pathname,
@@ -51,18 +64,6 @@ export default function Home() {
 
   const [searchQuery, setSearchQuery] = useState<string>("");
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
-
-  const sortOptions: { value: SearchOrderBy; label: string }[] = [
-    { value: "latest", label: "Latest" },
-    { value: "relevant", label: "Relevant" },
-    { value: "editorial", label: "Editorial" },
-  ];
-
-  const filterOptions: { value: Orientation; label: string }[] = [
-    { value: "landscape", label: "Landscape" },
-    { value: "portrait", label: "Portrait" },
-    { value: "squarish", label: "Squarish" },
-  ];
 
   const fetchImages = async () => {
     const response = await axios.get(
@@ -149,15 +150,21 @@ export default function Home() {
           </div>
         ) : (
           <div className="grid grid-cols-3 gap-4 mb-4">
-            {data?.map((image) => (
-              <Image
-                key={image.id}
-                alt={image.alt_description}
-                width={400}
-                height={400}
-                src={image.urls.regular}
-              />
-            ))}
+            {data?.map(
+              (image: {
+                id: string;
+                alt_description: string;
+                urls: { regular: string };
+              }) => (
+                <Image
+                  key={image.id}
+                  alt={image.alt_description}
+                  width={400}
+                  height={400}
+                  src={image.urls.regular}
+                />
+              )
+            )}
           </div>
         )}
       </div>
